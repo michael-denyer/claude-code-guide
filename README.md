@@ -189,6 +189,14 @@ Don't run all five on every diff — that's noise. Run them selectively.
 
 Skip on fresh/small repos. Add later when grep stops scaling.
 
+**`codemap` / `codemap-gr` (bundled in this repo).** Generates a `docs/CODEMAP.md` with mermaid architecture diagrams and **bidirectional links** between diagram nodes and source code — clicking a node jumps to the file/function, and source files link back to where they appear on the map. Numbered architectural layers (`[1]` entry points → `[5]` background) and a stable colour palette make code maps comparable across repos. `codemap-gr` is the variant backed by the `code-review-graph` knowledge graph (use it when you have CRG installed; the output is identical). Worth it when:
+
+- A new contributor needs a 5-minute orientation to a non-trivial repo
+- You're refactoring and want a single visual to sanity-check what touches what
+- A phase plan or PR description benefits from a visual summary
+
+See [`skills/`](skills/) in this repo for the skill files and install instructions.
+
 ### Tier 3 — install on the right projects
 
 **GSD (Getting Shit Done).** Massively useful on the right projects: large, multi-week efforts that require detailed planning, structured spec-to-execute discipline, and deep codebase mapping. The phase-gated workflow (spec → discuss → plan → execute → verify → secure → ship), milestone/phase/plan hierarchy under `.planning/`, parallel mapper agents, and persistent thread/context tooling are exactly what you want when:
@@ -1092,7 +1100,21 @@ crg build
 
 See `~/.claude/code-review-graph.md` for full recipe.
 
-### 8. `GSD` (per-project, on large efforts)
+### 8. `codemap` / `codemap-gr` skills (bundled with this repo)
+
+```bash
+# Clone or have this repo locally, then symlink into your skills dir:
+ln -s "$PWD/skills/codemap" ~/.claude/skills/codemap
+ln -s "$PWD/skills/codemap-gr" ~/.claude/skills/codemap-gr
+
+# Verify in Claude Code:
+#   /skill codemap
+# Then ask: "Generate a code map for this repo" → produces docs/CODEMAP.md
+```
+
+`codemap-gr` requires `code-review-graph` to be installed and a graph built for the repo. Without CRG, use plain `codemap` — same output format, different source of truth (filesystem walk vs knowledge graph).
+
+### 9. `GSD` (per-project, on large efforts)
 
 ```bash
 # In Claude Code, inside the target repo:
@@ -1102,7 +1124,7 @@ See `~/.claude/code-review-graph.md` for full recipe.
 /gsd-ingest-docs        # ingest existing ADRs/PRDs/SPECs into .planning/
 ```
 
-### 9. Python project bootstrap
+### 10. Python project bootstrap
 
 ```bash
 # In a new repo:
@@ -1113,7 +1135,7 @@ uv add --dev pytest pytest-randomly pytest-xdist pytest-timeout pytest-cov ruff
 #   addopts = "-n 3 --timeout=30 --cov=mypackage --cov-report=term-missing"
 ```
 
-### 10. CI hardening (one-time per repo)
+### 11. CI hardening (one-time per repo)
 
 ```bash
 # Add Dependabot for actions
