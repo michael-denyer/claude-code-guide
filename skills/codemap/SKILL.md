@@ -8,7 +8,7 @@ disable-model-invocation: false
 
 Generate a `docs/CODEMAP.md` with visual architecture and **bidirectional links** between diagram nodes and source code.
 
-> **Related skill:** If the repo has a `.code-review-graph/` directory or the `code-review-graph` MCP tools are available, prefer [`codemap-gr`](../codemap-gr/SKILL.md) — it uses the knowledge graph as the source of truth for symbols, file:line locations, and call edges. The output format, ID scheme, and [colour palette](#diagram-styling--colour) are identical between the two skills, so code maps look the same regardless of which generated them.
+> **Source of truth:** When the repo has a `.code-review-graph/` directory or the `code-review-graph` MCP tools are available, prefer reading the graph as the source of truth for symbols, file:line locations, and call edges (more accurate than walking the filesystem on large codebases). The output format, ID scheme, and [colour palette](#diagram-styling--colour) are unchanged — only the input source differs.
 
 ## Key Concepts
 

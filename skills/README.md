@@ -5,26 +5,23 @@ Claude Code skills bundled with this guide.
 | Skill | Purpose |
 | --- | --- |
 | [`codemap`](codemap/SKILL.md) | Generate a `docs/CODEMAP.md` with bidirectional links between mermaid diagrams and source code |
-| [`codemap-gr`](codemap-gr/SKILL.md) | Same output as `codemap`, but backed by the [`code-review-graph`](https://github.com/anthropics/code-review-graph) knowledge graph for accurate symbol locations and call edges |
 
-Both skills produce identical output formats — pick `codemap-gr` when the repo has `code-review-graph` available, otherwise use `codemap`.
+The skill is a filesystem-walking variant — for repos that use [`code-review-graph`](https://github.com/anthropics/code-review-graph), the same skill description triggers Claude to read the graph as the source of truth instead of doing its own walk.
 
 ## Install
 
-Clone or download this repo, then symlink the skill directories into your Claude Code skills folder:
+Clone or download this repo, then symlink the skill directory into your Claude Code skills folder:
 
 ```bash
 # User-scope (every project)
 ln -s "$PWD/skills/codemap" ~/.claude/skills/codemap
-ln -s "$PWD/skills/codemap-gr" ~/.claude/skills/codemap-gr
 
 # OR project-scope (just this repo)
 mkdir -p .claude/skills
 ln -s "$PWD/skills/codemap" .claude/skills/codemap
-ln -s "$PWD/skills/codemap-gr" .claude/skills/codemap-gr
 ```
 
-Alternatively, copy the directories rather than symlinking if you don't want updates from this repo.
+Alternatively, copy the directory rather than symlinking if you don't want updates from this repo.
 
 ## Verify
 

@@ -189,13 +189,55 @@ Don't run all five on every diff — that's noise. Run them selectively.
 
 Skip on fresh/small repos. Add later when grep stops scaling.
 
-**`codemap` / `codemap-gr` (bundled in this repo).** Generates a `docs/CODEMAP.md` with mermaid architecture diagrams and **bidirectional links** between diagram nodes and source code — clicking a node jumps to the file/function, and source files link back to where they appear on the map. Numbered architectural layers (`[1]` entry points → `[5]` background) and a stable colour palette make code maps comparable across repos. `codemap-gr` is the variant backed by the `code-review-graph` knowledge graph (use it when you have CRG installed; the output is identical). Worth it when:
+**`codemap` (bundled in this repo).** A skill that generates `docs/CODEMAP.md` — a single document containing a **mermaid architecture diagram** plus **per-layer reference tables** that link every node back to exact source file + line numbers. Clicking a node in the rendered diagram jumps to the code; comments left in the code (`# [1a:SymbolName] ...`) link back to the map. The result is a navigable, version-controlled architecture overview that stays in sync with the codebase.
 
-- A new contributor needs a 5-minute orientation to a non-trivial repo
+**What it produces, concretely**:
+
+1. **A `flowchart TB` mermaid diagram** organising components into five numbered layers:
+   - `[1]` Entry points / hot path (CLI, APIs, top-level resources)
+   - `[2]` Server / application layer
+   - `[3]` Core business logic / storage
+   - `[4]` Data layer / infrastructure
+   - `[5]` Background processes / async (jobs, mining, schedulers)
+
+   Each layer is a styled subgraph with a fixed colour palette (entry points blue, core logic green, storage pink, etc.) so maps from different repos are visually comparable at a glance.
+
+2. **Reference tables under per-layer headings** — one section per category (e.g. `### [1] Hot Tier Resources`), each table mapping subcategory IDs (`[1a]`, `[1b]`, `[2a]`, …) to the exact `path/to/file.py:42-51` location of the symbol, with a one-line description.
+
+3. **Source-code comments** placed directly above each target `def` / `class`:
+
+   ```python
+   # [3a:calculate_ld] Compute linkage disequilibrium across loci
+   def calculate_ld(genotypes: GenoMatrix) -> LDMatrix:
+       ...
+   ```
+
+   These survive renames, refactors, and file moves — the skill's sync logic uses the `[ID:SymbolName]` handle to keep the diagram, table, and code comment in lockstep.
+
+**Why bidirectional matters**:
+
+- **Top-down navigation**: rendered on GitHub or in VS Code, the diagram is clickable — a new contributor sees the architecture and jumps straight to the file
+- **Bottom-up navigation**: when reading code, the `# [3a:…]` comment tells you exactly where this lives in the architecture and which other components depend on it
+- **Refactor-resilient**: rename a function and the comment moves with it; the next `codemap` regeneration reads the comment and re-emits the table row pointing at the new location
+- **Diff-friendly**: the CODEMAP.md is plain text, so architecture changes show up in PR diffs alongside the code change
+
+**With `code-review-graph` installed**: the skill reads the graph (symbols, file:line, call edges) as the source of truth instead of walking the filesystem. The output format is identical, but accuracy improves on large codebases — call edges in the diagram come from the graph rather than heuristics.
+
+**Worth it when**:
+
+- A new contributor needs a 5-minute orientation to a non-trivial repo (the diagram + tables together = a tour you'd otherwise give verbally)
 - You're refactoring and want a single visual to sanity-check what touches what
 - A phase plan or PR description benefits from a visual summary
+- You want architecture documentation that doesn't rot — the regenerate command picks up real code, so the map can't silently lie
 
-See [`skills/`](skills/) in this repo for the skill files and install instructions.
+**Skip when**:
+
+- The repo is small enough that the directory tree IS the map
+- Architecture is changing weekly — regenerate cost outweighs the value of an outdated snapshot
+
+**Trigger phrases**: ask Claude *"generate a code map for this repo"*, *"refresh the CODEMAP"*, or *"add a code map under docs/"* and the skill will be invoked automatically.
+
+See [`skills/`](skills/) in this repo for the skill file and install instructions.
 
 ### Tier 3 — install on the right projects
 
@@ -1154,19 +1196,18 @@ crg build
 
 See `~/.claude/code-review-graph.md` for full recipe.
 
-### 9. `codemap` / `codemap-gr` skills (bundled with this repo)
+### 9. `codemap` skill (bundled with this repo)
 
 ```bash
 # Clone or have this repo locally, then symlink into your skills dir:
 ln -s "$PWD/skills/codemap" ~/.claude/skills/codemap
-ln -s "$PWD/skills/codemap-gr" ~/.claude/skills/codemap-gr
 
 # Verify in Claude Code:
 #   /skill codemap
 # Then ask: "Generate a code map for this repo" → produces docs/CODEMAP.md
 ```
 
-`codemap-gr` requires `code-review-graph` to be installed and a graph built for the repo. Without CRG, use plain `codemap` — same output format, different source of truth (filesystem walk vs knowledge graph).
+If [`code-review-graph`](https://github.com/anthropics/code-review-graph) is installed and a graph is built for the repo, the same skill reads the graph for accurate symbol locations and call edges instead of walking the filesystem — no separate skill or install step needed.
 
 ### 10. `GSD` (per-project, on large efforts)
 
