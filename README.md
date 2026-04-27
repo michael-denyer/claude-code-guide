@@ -429,8 +429,6 @@ Your personal overrides for this repo.
 Servers you want everywhere:
 
 - `code-review-graph` — code intelligence (if installed)
-- `context7` — library documentation lookup
-- `github` — if you trust it with a PAT (scope to read-only where possible)
 
 ### Project (`<repo>/.mcp.json`, committed)
 
@@ -458,10 +456,6 @@ Servers tied to this project's external systems. **Default to read-only connecti
         "--dsn", "${POSTGRES_READONLY_URL}",
         "--readonly"
       ]
-    },
-    "atlassian": {
-      "command": "npx",
-      "args": ["-y", "@atlassian/mcp-server"]
     }
   }
 }
